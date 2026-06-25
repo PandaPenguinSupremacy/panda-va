@@ -105,26 +105,51 @@ const Index = () => {
     setIndex(getPrevQuestionIndex(index, answers));
   };
 
-  const handleSubmitEmail = async ({ firstName: fn, email }: { firstName: string; email: string }) => {
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.from("assessment_submissions").insert({
-        first_name: fn,
-        email,
-        answers_json: answers,
-        recommended_path: recommendation.path,
-      });
-      if (error) throw error;
-      setFirstName(fn);
-      clearState();
-      setStage("thanks");
-    } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  const handleSubmitEmail = async ({
+  firstName: fn,
+  email,
+}: {
+  firstName: string;
+  email: string;
+}) => {
+  setSubmitting(true);
+
+  try {
+    const submissionData = {
+      first_name: fn,
+      email,
+      answers_json: answers,
+      recommended_path: recommendation.path,
+    };
+
+    const { error } = await supabase
+      .from("assessment_submissions")
+      .insert(submissionData);
+
+    if (error) throw error;
+
+    // Send lead to Make.com
+    await fetch(
+      "https://hook.us2.make.com/m0yo0uge2nxnjdwrncpl6e14f3i5455c",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submissionData),
+      }
+    );
+
+    setFirstName(fn);
+    clearState();
+    setStage("thanks");
+  } catch (err) {
+    console.error(err);
+    toast.error("Something went wrong. Please try again.");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const resetAll = () => {
     clearState();
