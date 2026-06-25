@@ -129,16 +129,23 @@ const Index = () => {
     if (error) throw error;
 
     // Send lead to Make.com
-    await fetch(
-      "https://hook.us2.make.com/m0yo0uge2nxnjdwrncpl6e14f3i5455c",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData),
-      }
-    );
+    console.log("Sending to Make:", submissionData);
+
+const makeResponse = await fetch(
+  "https://hook.us2.make.com/m0yo0uge2nxnjdwrncpl6e14f3i5455c",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(submissionData),
+  }
+);
+
+console.log("Make response status:", makeResponse.status);
+
+const makeText = await makeResponse.text();
+console.log("Make response body:", makeText);
 
     setFirstName(fn);
     clearState();
