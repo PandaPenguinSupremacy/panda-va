@@ -36,7 +36,7 @@ type Stage =
 const Index = () => {
   console.log("INDEX COMPONENT LOADED - VERSION 2");
 
-const Index = () => {
+
   const [stage, setStage] = useState<Stage>("landing");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
