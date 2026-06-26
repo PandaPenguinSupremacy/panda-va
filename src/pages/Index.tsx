@@ -23,6 +23,7 @@ import { PandaBg } from "@/components/assessment/PandaBg";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import pandaLogo from "@/assets/panda-logo-new.png";
+import pandaMascot from "@/assets/panda-mascot.png";
 
 type Stage =
   | "landing"
@@ -33,6 +34,35 @@ type Stage =
   | "results"
   | "thanks";
 
+/**
+ * Atmospheric ghost panda — blended into the question page background.
+ * Opacity 0.10–0.12, heavy blur, gradient mask so it fades away at bottom.
+ * Positioned behind and slightly above the question card.
+ * This is purely decorative; screen readers skip it.
+ */
+const AtmosphericPanda = () => (
+  <div
+    aria-hidden
+    className="pointer-events-none absolute select-none"
+    style={{
+      top: "60px",
+      right: "-60px",
+      opacity: 0.11,
+      filter: "blur(1.5px)",
+      maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, transparent 100%)",
+      WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, transparent 100%)",
+      zIndex: 0,
+    }}
+  >
+    <img
+      src={pandaMascot}
+      alt=""
+      className="w-64 h-64 object-contain"
+      draggable={false}
+    />
+  </div>
+);
+
 const Index = () => {
   const [stage, setStage] = useState<Stage>("landing");
   const [index, setIndex] = useState(0);
@@ -41,6 +71,39 @@ const Index = () => {
   const [submitting, setSubmitting] = useState(false);
   const [passedQ6, setPassedQ6] = useState(false);
   const [passedQ12, setPassedQ12] = useState(false);
+
+  /**
+   * Enforce no-scroll on html/body/#root for all non-landing stages.
+   * Landing is a scrollable page by design (long content).
+   * All assessment stages must be fully viewport-locked.
+   */
+  useEffect(() => {
+    const needsLock = stage !== "landing";
+    const els = [
+      document.documentElement,
+      document.body,
+      document.getElementById("root"),
+    ].filter(Boolean) as HTMLElement[];
+
+    if (needsLock) {
+      els.forEach((el) => {
+        el.style.height = "100%";
+        el.style.overflow = "hidden";
+      });
+    } else {
+      els.forEach((el) => {
+        el.style.height = "";
+        el.style.overflow = "";
+      });
+    }
+
+    return () => {
+      els.forEach((el) => {
+        el.style.height = "";
+        el.style.overflow = "";
+      });
+    };
+  }, [stage]);
 
   useEffect(() => {
     const s = loadState();
@@ -158,19 +221,23 @@ const Index = () => {
 
   return (
     <AnimatePresence mode="wait">
-      {/* Landing */}
+      {/* ── Landing (scrollable) ────────────────────────────────────────── */}
       {stage === "landing" && (
-        <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <motion.div
+          key="landing"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
           <Landing onStart={handleStart} />
         </motion.div>
       )}
 
       {/* ── Questions ─────────────────────────────────────────────────────
-          Mobile: fixed 100dvh flex column — header pinned, content fills
-          remaining space with overflow-y-auto so if a question is very
-          long the user can still access all options, but the default for
-          all optimized questions is zero scroll.
-          Desktop: original max-w-2xl centered layout.
+          Viewport-locked (100dvh, overflow:hidden).
+          Atmospheric panda is blended behind content (opacity ~0.11, blur).
+          Mobile: header pinned, only option list scrolls if needed.
+          Desktop: max-w-[720px] centered, vertically centered content.
       ──────────────────────────────────────────────────────────────────── */}
       {stage === "questions" && (
         <motion.div
@@ -179,14 +246,16 @@ const Index = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="relative overflow-hidden"
-          style={{ height: "100dvh" }}   /* lock to exact viewport height */
+          style={{ height: "100dvh" }}
         >
           <PandaBg />
+          {/* Atmospheric panda ghost — integrated into background */}
+          <AtmosphericPanda />
 
-          {/* ── Mobile layout: pinned header + scrollable content area ── */}
+          {/* ── Mobile layout ── */}
           <div className="flex flex-col h-full lg:hidden">
-            {/* Header */}
-            <div className="shrink-0 px-4 pt-3 pb-2 bg-gradient-to-b from-background/90 to-background/0 backdrop-blur z-20">
+            {/* Pinned header */}
+            <div className="shrink-0 px-4 pt-3 pb-2 relative z-20 bg-gradient-to-b from-background/90 to-background/0 backdrop-blur">
               <div className="flex items-center gap-2 mb-2">
                 <button
                   onClick={handleBack}
@@ -200,8 +269,8 @@ const Index = () => {
               <ProgressBar current={position} total={total} />
             </div>
 
-            {/* Question content — fills remaining height, internal scroll only if needed */}
-            <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4">
+            {/* Question content — fills remaining space; only this scrolls if needed */}
+            <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4 relative z-10">
               <AnimatePresence mode="wait">
                 <QuestionCard
                   key={questions[index].id}
@@ -214,26 +283,26 @@ const Index = () => {
             </div>
           </div>
 
-          {/* ── Desktop layout: original centered layout ── */}
-          <div className="hidden lg:block h-full overflow-y-auto">
-            <div className="relative max-w-2xl mx-auto px-5 pt-6 pb-16">
-              {/* Sticky header */}
-              <div className="sticky top-0 z-20 -mx-5 px-5 pt-2 pb-3 bg-gradient-to-b from-background/85 to-background/0 backdrop-blur">
-                <div className="flex items-center gap-3 mb-3">
-                  <button
-                    onClick={handleBack}
-                    aria-label="Back"
-                    className="h-10 w-10 rounded-full glass flex items-center justify-center hover:border-primary/40 transition-colors shrink-0"
-                  >
-                    <ArrowLeft className="h-4 w-4 text-primary" />
-                  </button>
-                  <img src={pandaLogo} alt="Panda VA" className="h-14 w-auto" />
-                  <div className="flex-1" />
-                </div>
-                <ProgressBar current={position} total={total} />
+          {/* ── Desktop layout: max-w-[720px], vertically centered ── */}
+          <div className="hidden lg:flex lg:flex-col h-full overflow-hidden">
+            {/* Sticky header */}
+            <div className="shrink-0 relative z-20 max-w-[720px] mx-auto w-full px-6 pt-5 pb-3">
+              <div className="flex items-center gap-3 mb-3">
+                <button
+                  onClick={handleBack}
+                  aria-label="Back"
+                  className="h-10 w-10 rounded-full glass flex items-center justify-center hover:border-primary/40 transition-colors shrink-0"
+                >
+                  <ArrowLeft className="h-4 w-4 text-primary" />
+                </button>
+                <img src={pandaLogo} alt="Panda VA" className="h-12 w-auto" />
               </div>
+              <ProgressBar current={position} total={total} />
+            </div>
 
-              <div className="mt-8">
+            {/* Vertically centered question area */}
+            <div className="flex-1 flex items-center justify-center px-6 overflow-hidden">
+              <div className="w-full max-w-[720px] relative z-10">
                 <AnimatePresence mode="wait">
                   <QuestionCard
                     key={questions[index].id}
@@ -249,28 +318,51 @@ const Index = () => {
         </motion.div>
       )}
 
-      {/* Transitions */}
+      {/* ── Transition pages (both 100dvh, no-scroll) ─────────────────── */}
       {stage === "transition-6" && (
-        <motion.div key="transition-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <motion.div
+          key="transition-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={{ height: "100dvh", overflow: "hidden" }}
+        >
           <TransitionPage variant="halfway" onContinue={() => setStage("questions")} />
         </motion.div>
       )}
       {stage === "transition-12" && (
-        <motion.div key="transition-12" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <motion.div
+          key="transition-12"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={{ height: "100dvh", overflow: "hidden" }}
+        >
           <TransitionPage variant="almost" onContinue={() => setStage("questions")} />
         </motion.div>
       )}
 
-      {/* Processing */}
+      {/* ── Processing ────────────────────────────────────────────────── */}
       {stage === "processing" && (
-        <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <motion.div
+          key="processing"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={{ height: "100dvh", overflow: "hidden" }}
+        >
           <Processing onComplete={() => setStage("results")} durationMs={7000} />
         </motion.div>
       )}
 
-      {/* Results */}
+      {/* ── Results (scrollable — long form content) ───────────────────── */}
       {stage === "results" && (
-        <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <motion.div
+          key="results"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
           <ResultsPreview
             recommendation={recommendation}
             onSubmit={handleSubmitEmail}
@@ -279,9 +371,14 @@ const Index = () => {
         </motion.div>
       )}
 
-      {/* Thanks */}
+      {/* ── Thank You (scrollable — long checklist) ────────────────────── */}
       {stage === "thanks" && (
-        <motion.div key="thanks" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <motion.div
+          key="thanks"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
           <ThankYou firstName={firstName} onHome={resetAll} />
         </motion.div>
       )}

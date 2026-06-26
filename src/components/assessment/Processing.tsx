@@ -28,7 +28,7 @@ export const Processing = ({ onComplete, durationMs = 7000 }: Props) => {
       const elapsed = t - start;
       const p = Math.min(100, Math.round((elapsed / durationMs) * 100));
       setPercent(p);
-      const d = Math.min(steps.length, Math.floor((p / 100) * steps.length) + (p >= 100 ? 0 : 0));
+      const d = Math.min(steps.length, Math.floor((p / 100) * steps.length));
       setDone(d);
       if (p < 100) raf = requestAnimationFrame(tick);
       else setTimeout(onComplete, 500);
@@ -38,40 +38,67 @@ export const Processing = ({ onComplete, durationMs = 7000 }: Props) => {
   }, [durationMs, onComplete]);
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-6 py-10 overflow-hidden">
+    /**
+     * Viewport-locked: height 100dvh, overflow hidden.
+     * Content is vertically centered and compact enough to always fit.
+     */
+    <div
+      className="relative flex items-center justify-center px-5 overflow-hidden"
+      style={{ height: "100dvh" }}
+    >
       <PandaBg dense />
+
       <div className="relative w-full max-w-md text-center">
-        <motion.img
-          src={pandaMascot}
-          alt="Panda VA coach analyzing"
+        {/* Mascot — atmospheric, floating */}
+        <motion.div
           initial={{ scale: 0.85, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="w-44 h-44 mx-auto object-contain drop-shadow-2xl animate-float"
-        />
+          className="relative mx-auto mb-2"
+          style={{ width: 110, height: 110 }}
+        >
+          {/* Subtle glow ring behind mascot */}
+          <div
+            className="absolute inset-0 rounded-full pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle, hsl(270 95% 82% / 0.45) 0%, transparent 70%)",
+              transform: "scale(1.4)",
+            }}
+          />
+          <img
+            src={pandaMascot}
+            alt="Panda VA coach analyzing"
+            className="w-full h-full object-contain drop-shadow-2xl animate-float relative z-10"
+          />
+        </motion.div>
+
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-2 text-3xl sm:text-4xl font-extrabold"
+          className="text-2xl sm:text-3xl font-extrabold"
         >
           Analyzing Your Responses…
         </motion.h1>
-        <p className="mt-2 text-muted-foreground text-balance">
+        <p className="mt-1 text-sm text-muted-foreground text-balance">
           Our Panda VA Career Coach is identifying your strongest career path.
         </p>
 
-        <div className="mt-6 glass-strong rounded-3xl p-6 text-left">
-          <div className="flex items-end justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Progress</span>
-            <span className="text-3xl font-extrabold text-gradient">{percent}%</span>
+        <div className="mt-4 glass-strong rounded-3xl p-5 text-left">
+          <div className="flex items-end justify-between mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Progress
+            </span>
+            <span className="text-2xl font-extrabold text-gradient">{percent}%</span>
           </div>
-          <div className="h-2.5 w-full rounded-full bg-primary-soft overflow-hidden mb-5">
+          <div className="h-2 w-full rounded-full bg-primary-soft overflow-hidden mb-4">
             <motion.div
               className="h-full rounded-full gradient-primary"
               animate={{ width: `${percent}%` }}
               transition={{ ease: "linear", duration: 0.1 }}
             />
           </div>
-          <ul className="space-y-3">
+
+          <ul className="space-y-2">
             {steps.map((label, i) => {
               const isDone = i < done;
               const isActive = i === done && percent < 100;
@@ -79,26 +106,32 @@ export const Processing = ({ onComplete, durationMs = 7000 }: Props) => {
                 <li
                   key={label}
                   className={`flex items-center gap-3 rounded-2xl px-3 py-2 transition-colors ${
-                    isDone || percent >= 100 ? "bg-primary-soft/70" : isActive ? "bg-primary-soft/40" : "opacity-50"
+                    isDone || percent >= 100
+                      ? "bg-primary-soft/70"
+                      : isActive
+                      ? "bg-primary-soft/40"
+                      : "opacity-50"
                   }`}
                 >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground shrink-0">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shrink-0">
                     {isDone || percent >= 100 ? (
-                      <Check className="h-4 w-4" />
+                      <Check className="h-3.5 w-3.5" />
                     ) : isActive ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     ) : (
-                      <span className="h-2 w-2 rounded-full bg-primary-foreground/60" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground/60" />
                     )}
                   </span>
-                  <span className="font-medium text-sm sm:text-base">{label}</span>
+                  <span className="font-medium text-sm">{label}</span>
                 </li>
               );
             })}
           </ul>
         </div>
 
-        <p className="mt-4 text-xs text-muted-foreground">Usually takes less than 10 seconds</p>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Usually takes less than 10 seconds
+        </p>
       </div>
     </div>
   );

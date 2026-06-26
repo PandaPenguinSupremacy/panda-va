@@ -4,19 +4,18 @@ import {
   Star, Shield, Heart, Zap, TrendingUp, Quote, CheckCircle2, Users
 } from "lucide-react";
 import { PandaBg } from "./PandaBg";
-import pandaMascot from "@/assets/panda-mascot.png";
 import pandaLogo from "@/assets/panda-logo-new.png";
 
 interface Props {
   onStart: () => void;
 }
 
-// ─── Mobile-only data (unchanged from original) ───────────────────────────
+// ─── Mobile-only data ───────────────────────────────────────────────────────
 const benefits = [
-  { icon: Compass,   text: "Discover the VA path that fits you best" },
-  { icon: Target,    text: "Identify what's holding you back" },
-  { icon: Sparkles,  text: "Get personalized next steps" },
-  { icon: ListChecks,text: "Receive a tailored action plan" },
+  { icon: Compass,    text: "Discover the VA path that fits you best" },
+  { icon: Target,     text: "Identify what's holding you back" },
+  { icon: Sparkles,   text: "Get personalized next steps" },
+  { icon: ListChecks, text: "Receive a tailored action plan" },
 ];
 
 const trustItems = [
@@ -27,9 +26,9 @@ const trustItems = [
 
 // ─── Desktop-only data ────────────────────────────────────────────────────
 const desktopBenefitCards = [
-  { icon: Sparkles,   label: "Personalized",       sub: "Just for you" },
-  { icon: Zap,        label: "Quick & Easy",        sub: "Takes only 2–3 mins" },
-  { icon: TrendingUp, label: "Actionable Results",  sub: "Clear next steps" },
+  { icon: Sparkles,   label: "Personalized",      sub: "Just for you" },
+  { icon: Zap,        label: "Quick & Easy",       sub: "Takes only 2–3 mins" },
+  { icon: TrendingUp, label: "Actionable Results", sub: "Clear next steps" },
 ];
 
 const whatYouGet = [
@@ -45,6 +44,56 @@ const fadeUp = (delay = 0) => ({
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.45, ease: "easeOut", delay },
 });
+
+// ─── Decorative SVG orb — replaces panda on landing hero ─────────────────
+const HeroOrb = () => (
+  <div className="relative flex items-center justify-center w-full h-full">
+    {/* Outer soft ring */}
+    <motion.div
+      className="absolute rounded-full border border-primary/15"
+      style={{ width: 340, height: 340 }}
+      animate={{ rotate: 360 }}
+      transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+    />
+    {/* Middle ring */}
+    <motion.div
+      className="absolute rounded-full border border-primary/10"
+      style={{ width: 250, height: 250 }}
+      animate={{ rotate: -360 }}
+      transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+    />
+    {/* Inner glow core */}
+    <div
+      className="absolute rounded-full"
+      style={{
+        width: 180,
+        height: 180,
+        background: "radial-gradient(circle, hsl(270 95% 85% / 0.55) 0%, hsl(260 90% 90% / 0.2) 60%, transparent 80%)",
+      }}
+    />
+    {/* Floating sparkle dots on orbit */}
+    {[0, 72, 144, 216, 288].map((deg, i) => (
+      <motion.div
+        key={i}
+        className="absolute h-2.5 w-2.5 rounded-full bg-primary/40"
+        style={{
+          top: `calc(50% + ${Math.sin((deg * Math.PI) / 180) * 125}px - 5px)`,
+          left: `calc(50% + ${Math.cos((deg * Math.PI) / 180) * 125}px - 5px)`,
+        }}
+        animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0.9, 0.4] }}
+        transition={{ duration: 2 + i * 0.3, repeat: Infinity, delay: i * 0.4 }}
+      />
+    ))}
+    {/* Center logo mark */}
+    <motion.div
+      animate={{ scale: [1, 1.04, 1] }}
+      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      className="relative z-10 flex items-center justify-center h-20 w-20 rounded-full gradient-primary shadow-glow"
+    >
+      <Sparkles className="h-9 w-9 text-white" />
+    </motion.div>
+  </div>
+);
 
 export const Landing = ({ onStart }: Props) => {
   return (
@@ -78,26 +127,29 @@ export const Landing = ({ onStart }: Props) => {
           </svg>
         </div>
 
-        {/* ══ LEFT COLUMN — 30% — Mascot ══════════════════════════════════ */}
-        <div className="relative flex flex-col justify-end w-[30%] shrink-0 overflow-hidden">
-          {/* Large radial glow behind mascot */}
+        {/* ══ LEFT COLUMN — 30% — Decorative orb (no panda) ═══════════════ */}
+        <div className="relative flex flex-col justify-center items-center w-[30%] shrink-0 overflow-hidden">
+          {/* Large radial glow */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "radial-gradient(ellipse 80% 70% at 50% 80%, hsl(270 95% 82% / 0.55) 0%, transparent 70%)",
-            }}
-          />
-          {/* Wave/blob at bottom left */}
-          <div
-            className="absolute bottom-0 left-0 w-full h-[45%] pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(ellipse 120% 80% at 10% 100%, hsl(265 85% 60% / 0.22) 0%, transparent 70%)",
+                "radial-gradient(ellipse 80% 70% at 50% 55%, hsl(270 95% 82% / 0.45) 0%, transparent 70%)",
             }}
           />
 
-          {/* 100% Free badge at bottom */}
+          {/* Decorative orb replaces panda */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.88 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
+            className="relative z-10"
+            style={{ width: 340, height: 340 }}
+          >
+            <HeroOrb />
+          </motion.div>
+
+          {/* 100% Free badge */}
           <motion.div
             {...fadeUp(0.6)}
             className="absolute bottom-8 left-6 z-10 flex items-center gap-3 glass-strong rounded-2xl px-4 py-3 max-w-[200px]"
@@ -112,17 +164,6 @@ export const Landing = ({ onStart }: Props) => {
               </p>
             </div>
           </motion.div>
-
-          {/* Mascot — fills most of left column */}
-          <motion.img
-            src={pandaMascot}
-            alt="Panda VA mascot"
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
-            className="relative z-10 w-full max-w-[380px] mx-auto object-contain drop-shadow-2xl animate-float"
-            style={{ marginBottom: "-2px" }}
-          />
         </div>
 
         {/* ══ CENTER COLUMN — 40% — Hero content ══════════════════════════ */}
@@ -207,7 +248,6 @@ export const Landing = ({ onStart }: Props) => {
             {...fadeUp(0.55)}
             className="flex items-center justify-center gap-3"
           >
-            {/* Stacked avatar circles */}
             <div className="flex -space-x-2">
               {["hsl(270,70%,75%)", "hsl(290,70%,72%)", "hsl(250,70%,78%)", "hsl(275,65%,70%)"].map(
                 (color, i) => (
@@ -267,7 +307,6 @@ export const Landing = ({ onStart }: Props) => {
             transition={{ duration: 0.45, delay: 0.55 }}
             className="glass-strong rounded-3xl p-4 mt-1"
           >
-            {/* Quote icon */}
             <div className="h-8 w-8 rounded-xl bg-primary-soft flex items-center justify-center mb-3">
               <Quote className="h-4 w-4 text-primary" />
             </div>
@@ -277,14 +316,12 @@ export const Landing = ({ onStart }: Props) => {
               and what I should do next.
             </p>
 
-            {/* Stars */}
             <div className="flex gap-0.5 mb-3">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
               ))}
             </div>
 
-            {/* Attribution */}
             <div className="flex items-center gap-2.5">
               <div className="h-9 w-9 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
                 A
@@ -299,7 +336,8 @@ export const Landing = ({ onStart }: Props) => {
       </div>
 
       {/* ════════════════════════════════════════════════════════════════════
-          MOBILE / TABLET LAYOUT  (below lg — completely unchanged)
+          MOBILE / TABLET LAYOUT  (below lg)
+          — panda mascot removed; decorative elements only
       ════════════════════════════════════════════════════════════════════ */}
       <div className="lg:hidden">
         <main className="relative px-5 pt-5 pb-8 sm:pt-7">
@@ -343,20 +381,15 @@ export const Landing = ({ onStart }: Props) => {
               experience, strengths, interests, and goals.
             </motion.p>
 
-            {/* Mascot */}
+            {/* Decorative orb — replaces the panda mascot image on mobile */}
             <motion.div
               initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.15 }}
-              className="relative mx-auto mt-3 w-[200px] sm:w-[240px]"
+              className="relative mx-auto mt-4 mb-1"
+              style={{ width: 180, height: 180 }}
             >
-              <img
-                src={pandaMascot}
-                alt="Friendly Panda VA mascot with headset"
-                className="w-full h-auto drop-shadow-2xl animate-float"
-                width={1024}
-                height={1024}
-              />
+              <HeroOrb />
             </motion.div>
 
             {/* Feature cards */}
