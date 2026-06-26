@@ -35,29 +35,34 @@ type Stage =
   | "thanks";
 
 /**
- * Atmospheric ghost panda — blended into the question page background.
- * Opacity 0.10–0.12, heavy blur, gradient mask so it fades away at bottom.
- * Positioned behind and slightly above the question card.
- * This is purely decorative; screen readers skip it.
+ * AtmosphericPanda
+ * Blended into the question page background.
+ * Positioned bottom-left (like reference image), very low opacity,
+ * with blur and a gradient mask so it fades into the background.
+ * Purely decorative — pointer-events none, aria-hidden.
  */
 const AtmosphericPanda = () => (
   <div
     aria-hidden
-    className="pointer-events-none absolute select-none"
+    className="pointer-events-none select-none absolute"
     style={{
-      top: "60px",
-      right: "-60px",
-      opacity: 0.11,
-      filter: "blur(1.5px)",
-      maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, transparent 100%)",
-      WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, transparent 100%)",
+      bottom: "0%",
+      left: "-5%",
+      width: "42%",
+      maxWidth: "340px",
+      opacity: 0.12,
+      filter: "blur(0.4px)",
+      maskImage:
+        "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 85%)",
+      WebkitMaskImage:
+        "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 85%)",
       zIndex: 0,
     }}
   >
     <img
       src={pandaMascot}
       alt=""
-      className="w-64 h-64 object-contain"
+      className="w-full h-auto object-contain"
       draggable={false}
     />
   </div>
@@ -73,32 +78,31 @@ const Index = () => {
   const [passedQ12, setPassedQ12] = useState(false);
 
   /**
-   * Enforce no-scroll on html/body/#root for all non-landing stages.
-   * Landing is a scrollable page by design (long content).
-   * All assessment stages must be fully viewport-locked.
+   * Viewport lock: all assessment stages (everything except landing)
+   * must never scroll. We set overflow:hidden + height:100% on
+   * html / body / #root and restore on cleanup.
    */
   useEffect(() => {
-    const needsLock = stage !== "landing";
-    const els = [
+    const shouldLock = stage !== "landing";
+    const targets = [
       document.documentElement,
       document.body,
       document.getElementById("root"),
     ].filter(Boolean) as HTMLElement[];
 
-    if (needsLock) {
-      els.forEach((el) => {
+    if (shouldLock) {
+      targets.forEach((el) => {
         el.style.height = "100%";
         el.style.overflow = "hidden";
       });
     } else {
-      els.forEach((el) => {
+      targets.forEach((el) => {
         el.style.height = "";
         el.style.overflow = "";
       });
     }
-
     return () => {
-      els.forEach((el) => {
+      targets.forEach((el) => {
         el.style.height = "";
         el.style.overflow = "";
       });
@@ -221,7 +225,8 @@ const Index = () => {
 
   return (
     <AnimatePresence mode="wait">
-      {/* ── Landing (scrollable) ────────────────────────────────────────── */}
+
+      {/* ── Landing — scrollable, no lock ───────────────────────────── */}
       {stage === "landing" && (
         <motion.div
           key="landing"
@@ -233,11 +238,18 @@ const Index = () => {
         </motion.div>
       )}
 
-      {/* ── Questions ─────────────────────────────────────────────────────
-          Viewport-locked (100dvh, overflow:hidden).
-          Atmospheric panda is blended behind content (opacity ~0.11, blur).
-          Mobile: header pinned, only option list scrolls if needed.
-          Desktop: max-w-[720px] centered, vertically centered content.
+      {/* ── Questions ────────────────────────────────────────────────────
+          Layout spec:
+            ┌─────────────────────────────────────┐
+            │ Logo + Progress (pinned)            │
+            ├─────────────────────────────────────┤
+            │ [atmospheric panda ghost bg]        │
+            │ Question text                       │
+            │ □ option  □ option  □ option        │
+            │ "Your background matters."          │
+            └─────────────────────────────────────┘
+          Mobile: header pinned, content fills rest, only options scroll
+          Desktop: max-w-[720px] centered, vertically centered content
       ──────────────────────────────────────────────────────────────────── */}
       {stage === "questions" && (
         <motion.div
@@ -248,14 +260,23 @@ const Index = () => {
           className="relative overflow-hidden"
           style={{ height: "100dvh" }}
         >
+          {/* Pastel blob background */}
           <PandaBg />
-          {/* Atmospheric panda ghost — integrated into background */}
+
+          {/* Atmospheric panda — bottom-left ghost, opacity 0.12, blended */}
           <AtmosphericPanda />
 
-          {/* ── Mobile layout ── */}
+          {/* ── MOBILE ── */}
           <div className="flex flex-col h-full lg:hidden">
             {/* Pinned header */}
-            <div className="shrink-0 px-4 pt-3 pb-2 relative z-20 bg-gradient-to-b from-background/90 to-background/0 backdrop-blur">
+            <div
+              className="shrink-0 px-4 pt-3 pb-2 relative z-20"
+              style={{
+                background:
+                  "linear-gradient(to bottom, hsl(var(--background) / 0.92) 60%, transparent)",
+                backdropFilter: "blur(6px)",
+              }}
+            >
               <div className="flex items-center gap-2 mb-2">
                 <button
                   onClick={handleBack}
@@ -269,7 +290,7 @@ const Index = () => {
               <ProgressBar current={position} total={total} />
             </div>
 
-            {/* Question content — fills remaining space; only this scrolls if needed */}
+            {/* Question content — only this area may scroll */}
             <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4 relative z-10">
               <AnimatePresence mode="wait">
                 <QuestionCard
@@ -283,24 +304,33 @@ const Index = () => {
             </div>
           </div>
 
-          {/* ── Desktop layout: max-w-[720px], vertically centered ── */}
+          {/* ── DESKTOP — max-w-720, vertically centered ── */}
           <div className="hidden lg:flex lg:flex-col h-full overflow-hidden">
-            {/* Sticky header */}
-            <div className="shrink-0 relative z-20 max-w-[720px] mx-auto w-full px-6 pt-5 pb-3">
-              <div className="flex items-center gap-3 mb-3">
-                <button
-                  onClick={handleBack}
-                  aria-label="Back"
-                  className="h-10 w-10 rounded-full glass flex items-center justify-center hover:border-primary/40 transition-colors shrink-0"
-                >
-                  <ArrowLeft className="h-4 w-4 text-primary" />
-                </button>
-                <img src={pandaLogo} alt="Panda VA" className="h-12 w-auto" />
+            {/* Pinned header */}
+            <div
+              className="shrink-0 relative z-20"
+              style={{
+                background:
+                  "linear-gradient(to bottom, hsl(var(--background) / 0.88) 60%, transparent)",
+                backdropFilter: "blur(8px)",
+              }}
+            >
+              <div className="max-w-[720px] mx-auto px-6 pt-5 pb-3">
+                <div className="flex items-center gap-3 mb-3">
+                  <button
+                    onClick={handleBack}
+                    aria-label="Back"
+                    className="h-10 w-10 rounded-full glass flex items-center justify-center hover:border-primary/40 transition-colors shrink-0"
+                  >
+                    <ArrowLeft className="h-4 w-4 text-primary" />
+                  </button>
+                  <img src={pandaLogo} alt="Panda VA" className="h-12 w-auto" />
+                </div>
+                <ProgressBar current={position} total={total} />
               </div>
-              <ProgressBar current={position} total={total} />
             </div>
 
-            {/* Vertically centered question area */}
+            {/* Vertically centered question — no scroll */}
             <div className="flex-1 flex items-center justify-center px-6 overflow-hidden">
               <div className="w-full max-w-[720px] relative z-10">
                 <AnimatePresence mode="wait">
@@ -318,7 +348,7 @@ const Index = () => {
         </motion.div>
       )}
 
-      {/* ── Transition pages (both 100dvh, no-scroll) ─────────────────── */}
+      {/* ── Transition pages — 100dvh locked ────────────────────────── */}
       {stage === "transition-6" && (
         <motion.div
           key="transition-6"
@@ -342,7 +372,7 @@ const Index = () => {
         </motion.div>
       )}
 
-      {/* ── Processing ────────────────────────────────────────────────── */}
+      {/* ── Processing — 100dvh locked ───────────────────────────────── */}
       {stage === "processing" && (
         <motion.div
           key="processing"
@@ -355,7 +385,7 @@ const Index = () => {
         </motion.div>
       )}
 
-      {/* ── Results (scrollable — long form content) ───────────────────── */}
+      {/* ── Results — scrollable (long form content) ─────────────────── */}
       {stage === "results" && (
         <motion.div
           key="results"
@@ -371,7 +401,7 @@ const Index = () => {
         </motion.div>
       )}
 
-      {/* ── Thank You (scrollable — long checklist) ────────────────────── */}
+      {/* ── Thank You — scrollable (long checklist) ──────────────────── */}
       {stage === "thanks" && (
         <motion.div
           key="thanks"

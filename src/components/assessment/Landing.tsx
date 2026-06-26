@@ -1,16 +1,16 @@
 import { motion } from "framer-motion";
 import {
   ArrowRight, Sparkles, Target, Compass, ListChecks, Lock,
-  Star, Shield, Heart, Zap, TrendingUp, Quote, CheckCircle2, Users
+  Star, Shield, Heart, Zap, TrendingUp, Quote,
 } from "lucide-react";
 import { PandaBg } from "./PandaBg";
+import pandaMascot from "@/assets/panda-mascot.png";
 import pandaLogo from "@/assets/panda-logo-new.png";
 
 interface Props {
   onStart: () => void;
 }
 
-// ─── Mobile-only data ───────────────────────────────────────────────────────
 const benefits = [
   { icon: Compass,    text: "Discover the VA path that fits you best" },
   { icon: Target,     text: "Identify what's holding you back" },
@@ -24,7 +24,6 @@ const trustItems = [
   { icon: Heart,  title: "Built for You",     desc: "Personalized results based on your unique background." },
 ];
 
-// ─── Desktop-only data ────────────────────────────────────────────────────
 const desktopBenefitCards = [
   { icon: Sparkles,   label: "Personalized",      sub: "Just for you" },
   { icon: Zap,        label: "Quick & Easy",       sub: "Takes only 2–3 mins" },
@@ -38,79 +37,28 @@ const whatYouGet = [
   { icon: ListChecks, text: "Receive a tailored action plan" },
 ];
 
-// ─── Stagger helpers ──────────────────────────────────────────────────────
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 18 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.45, ease: "easeOut", delay },
 });
 
-// ─── Decorative SVG orb — replaces panda on landing hero ─────────────────
-const HeroOrb = () => (
-  <div className="relative flex items-center justify-center w-full h-full">
-    {/* Outer soft ring */}
-    <motion.div
-      className="absolute rounded-full border border-primary/15"
-      style={{ width: 340, height: 340 }}
-      animate={{ rotate: 360 }}
-      transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-    />
-    {/* Middle ring */}
-    <motion.div
-      className="absolute rounded-full border border-primary/10"
-      style={{ width: 250, height: 250 }}
-      animate={{ rotate: -360 }}
-      transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-    />
-    {/* Inner glow core */}
-    <div
-      className="absolute rounded-full"
-      style={{
-        width: 180,
-        height: 180,
-        background: "radial-gradient(circle, hsl(270 95% 85% / 0.55) 0%, hsl(260 90% 90% / 0.2) 60%, transparent 80%)",
-      }}
-    />
-    {/* Floating sparkle dots on orbit */}
-    {[0, 72, 144, 216, 288].map((deg, i) => (
-      <motion.div
-        key={i}
-        className="absolute h-2.5 w-2.5 rounded-full bg-primary/40"
-        style={{
-          top: `calc(50% + ${Math.sin((deg * Math.PI) / 180) * 125}px - 5px)`,
-          left: `calc(50% + ${Math.cos((deg * Math.PI) / 180) * 125}px - 5px)`,
-        }}
-        animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0.9, 0.4] }}
-        transition={{ duration: 2 + i * 0.3, repeat: Infinity, delay: i * 0.4 }}
-      />
-    ))}
-    {/* Center logo mark */}
-    <motion.div
-      animate={{ scale: [1, 1.04, 1] }}
-      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-      className="relative z-10 flex items-center justify-center h-20 w-20 rounded-full gradient-primary shadow-glow"
-    >
-      <Sparkles className="h-9 w-9 text-white" />
-    </motion.div>
-  </div>
-);
-
 export const Landing = ({ onStart }: Props) => {
   return (
     <div className="relative overflow-hidden">
       <PandaBg dense />
 
-      {/* ════════════════════════════════════════════════════════════════════
-          DESKTOP LAYOUT  (lg and above — 3 columns, 100vh, no scroll)
-      ════════════════════════════════════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════════════════════════════
+          DESKTOP LAYOUT — 3 columns, 100vh, no scroll
+      ═══════════════════════════════════════════════════════════════════ */}
       <div className="hidden lg:flex h-screen w-full overflow-hidden relative">
 
-        {/* ── Top-left logo watermark ── */}
+        {/* Top-left logo */}
         <div className="absolute top-5 left-6 z-20 flex items-center gap-2">
           <img src={pandaLogo} alt="Panda VA" className="h-9 object-contain" />
         </div>
 
-        {/* ── Top-right dot grid decoration ── */}
+        {/* Top-right dot grid */}
         <div className="absolute top-4 right-6 z-10 opacity-30">
           <svg width="110" height="90" viewBox="0 0 110 90" fill="none">
             {Array.from({ length: 6 }).map((_, row) =>
@@ -127,27 +75,24 @@ export const Landing = ({ onStart }: Props) => {
           </svg>
         </div>
 
-        {/* ══ LEFT COLUMN — 30% — Decorative orb (no panda) ═══════════════ */}
-        <div className="relative flex flex-col justify-center items-center w-[30%] shrink-0 overflow-hidden">
-          {/* Large radial glow */}
+        {/* ── LEFT COLUMN — Panda illustration ── */}
+        <div className="relative flex flex-col justify-end w-[30%] shrink-0 overflow-hidden">
+          {/* Radial glow behind mascot */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "radial-gradient(ellipse 80% 70% at 50% 55%, hsl(270 95% 82% / 0.45) 0%, transparent 70%)",
+                "radial-gradient(ellipse 80% 70% at 50% 80%, hsl(270 95% 82% / 0.55) 0%, transparent 70%)",
             }}
           />
-
-          {/* Decorative orb replaces panda */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.88 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
-            className="relative z-10"
-            style={{ width: 340, height: 340 }}
-          >
-            <HeroOrb />
-          </motion.div>
+          {/* Wave blob at bottom */}
+          <div
+            className="absolute bottom-0 left-0 w-full h-[45%] pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse 120% 80% at 10% 100%, hsl(265 85% 60% / 0.22) 0%, transparent 70%)",
+            }}
+          />
 
           {/* 100% Free badge */}
           <motion.div
@@ -164,12 +109,21 @@ export const Landing = ({ onStart }: Props) => {
               </p>
             </div>
           </motion.div>
+
+          {/* Panda mascot — full body illustration, fills left column */}
+          <motion.img
+            src={pandaMascot}
+            alt="Panda VA mascot"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
+            className="relative z-10 w-full max-w-[380px] mx-auto object-contain drop-shadow-2xl animate-float"
+            style={{ marginBottom: "-2px" }}
+          />
         </div>
 
-        {/* ══ CENTER COLUMN — 40% — Hero content ══════════════════════════ */}
+        {/* ── CENTER COLUMN — Hero content ── */}
         <div className="flex flex-col justify-center items-center px-8 xl:px-12 w-[40%] shrink-0 text-center">
-
-          {/* Tagline pill */}
           <motion.p
             {...fadeUp(0.15)}
             className="text-[11px] font-bold tracking-[0.22em] uppercase text-primary/80 mb-4 px-4 py-1.5 rounded-full glass border border-primary/20"
@@ -177,7 +131,6 @@ export const Landing = ({ onStart }: Props) => {
             Prepare • Present • Get Hired
           </motion.p>
 
-          {/* Headline */}
           <motion.h1
             {...fadeUp(0.22)}
             className="text-4xl xl:text-5xl font-extrabold leading-[1.08] text-foreground mb-1"
@@ -191,7 +144,6 @@ export const Landing = ({ onStart }: Props) => {
             <Heart className="h-5 w-5 text-primary-glow fill-primary-glow/40 mb-1 shrink-0" />
           </motion.div>
 
-          {/* Supporting text */}
           <motion.p
             {...fadeUp(0.33)}
             className="text-sm xl:text-base text-muted-foreground text-balance max-w-sm mb-6"
@@ -200,7 +152,6 @@ export const Landing = ({ onStart }: Props) => {
             best matches your experience, strengths, interests, and goals.
           </motion.p>
 
-          {/* 3 benefit mini-cards */}
           <motion.div
             {...fadeUp(0.38)}
             className="grid grid-cols-3 gap-2.5 w-full max-w-sm mb-6"
@@ -219,7 +170,6 @@ export const Landing = ({ onStart }: Props) => {
             ))}
           </motion.div>
 
-          {/* CTA button */}
           <motion.button
             onClick={onStart}
             initial={{ opacity: 0, scale: 0.95 }}
@@ -234,7 +184,6 @@ export const Landing = ({ onStart }: Props) => {
             <ArrowRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" />
           </motion.button>
 
-          {/* Under-CTA trust line */}
           <motion.p
             {...fadeUp(0.5)}
             className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground mb-5"
@@ -243,7 +192,6 @@ export const Landing = ({ onStart }: Props) => {
             Takes only 2–3 minutes • 100% Free
           </motion.p>
 
-          {/* Social proof avatars */}
           <motion.div
             {...fadeUp(0.55)}
             className="flex items-center justify-center gap-3"
@@ -268,10 +216,8 @@ export const Landing = ({ onStart }: Props) => {
           </motion.div>
         </div>
 
-        {/* ══ RIGHT COLUMN — 30% — What You'll Get + Testimonial ═════════ */}
+        {/* ── RIGHT COLUMN — What You'll Get + Testimonial ── */}
         <div className="flex flex-col justify-center px-6 xl:px-8 w-[30%] shrink-0 gap-3">
-
-          {/* Section label */}
           <motion.div
             {...fadeUp(0.2)}
             className="flex items-center gap-2 text-primary font-bold text-sm mb-1"
@@ -280,7 +226,6 @@ export const Landing = ({ onStart }: Props) => {
             What you'll get
           </motion.div>
 
-          {/* What You'll Get cards */}
           <div className="flex flex-col gap-2">
             {whatYouGet.map((item, i) => (
               <motion.div
@@ -300,7 +245,6 @@ export const Landing = ({ onStart }: Props) => {
             ))}
           </div>
 
-          {/* Testimonial card */}
           <motion.div
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
@@ -310,18 +254,15 @@ export const Landing = ({ onStart }: Props) => {
             <div className="h-8 w-8 rounded-xl bg-primary-soft flex items-center justify-center mb-3">
               <Quote className="h-4 w-4 text-primary" />
             </div>
-
             <p className="text-sm italic text-foreground leading-relaxed mb-3">
               This assessment helped me finally understand what path is right for me
               and what I should do next.
             </p>
-
             <div className="flex gap-0.5 mb-3">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
               ))}
             </div>
-
             <div className="flex items-center gap-2.5">
               <div className="h-9 w-9 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
                 A
@@ -335,13 +276,13 @@ export const Landing = ({ onStart }: Props) => {
         </div>
       </div>
 
-      {/* ════════════════════════════════════════════════════════════════════
-          MOBILE / TABLET LAYOUT  (below lg)
-          — panda mascot removed; decorative elements only
-      ════════════════════════════════════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════════════════════════════
+          MOBILE LAYOUT — scrollable long-form page
+      ═══════════════════════════════════════════════════════════════════ */}
       <div className="lg:hidden">
         <main className="relative px-5 pt-5 pb-8 sm:pt-7">
           <div className="mx-auto w-full max-w-xl text-center">
+
             {/* Logo */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -381,15 +322,18 @@ export const Landing = ({ onStart }: Props) => {
               experience, strengths, interests, and goals.
             </motion.p>
 
-            {/* Decorative orb — replaces the panda mascot image on mobile */}
+            {/* Panda mascot — hero illustration on mobile */}
             <motion.div
               initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.15 }}
-              className="relative mx-auto mt-4 mb-1"
-              style={{ width: 180, height: 180 }}
+              className="relative mx-auto mt-3 w-[200px] sm:w-[240px]"
             >
-              <HeroOrb />
+              <img
+                src={pandaMascot}
+                alt="Panda VA mascot with headset"
+                className="w-full h-auto drop-shadow-2xl animate-float"
+              />
             </motion.div>
 
             {/* Feature cards */}
@@ -405,7 +349,6 @@ export const Landing = ({ onStart }: Props) => {
                   whileHover={{ y: -2, scale: 1.01 }}
                   transition={{ type: "spring", stiffness: 300 }}
                   className="glass rounded-2xl p-3 flex items-center gap-3"
-                  style={{ animationDelay: `${i * 80}ms` }}
                 >
                   <span className="h-9 w-9 rounded-xl bg-primary-soft text-primary flex items-center justify-center shrink-0 shadow-sm">
                     <b.icon className="h-4 w-4" />

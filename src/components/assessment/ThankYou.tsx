@@ -77,7 +77,7 @@ export const ThankYou = ({ firstName, onHome }: Props) => {
           className="mt-8 flex flex-col gap-3"
         >
           <a
-            href="https://www.facebook.com/profile.php?id=61591044718001"
+            href="https://www.facebook.com/pandavaofficial"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 rounded-3xl gradient-primary text-primary-foreground font-semibold text-lg px-6 py-4 shadow-glow hover:scale-[1.01] transition-transform"
