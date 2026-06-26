@@ -78,16 +78,13 @@ const Index = () => {
 };
 
 const handleBack = () => {
-    if (index === 0) {
-      setStage("landing");
+  if (index === 0) {
+    setStage("landing");
+    return;
+  }
 
-      const total = getTotalActiveQuestions(answers);
-      const position = getActiveQuestionPosition(index, answers);
-
-      return;
-    }
-    setIndex(getPrevQuestionIndex(index, answers));
-  };
+  setIndex(getPrevQuestionIndex(index, answers));
+};
 
   const handleSubmitEmail = async ({ firstName: fn, email }: { firstName: string; email: string }) => {
     setSubmitting(true);
@@ -118,6 +115,9 @@ const handleBack = () => {
     setHitHalfway(false);
     setStage("landing");
   };
+
+  const total = getTotalActiveQuestions(answers);
+const position = getActiveQuestionPosition(index, answers);
 
   return (
     <AnimatePresence mode="wait">
