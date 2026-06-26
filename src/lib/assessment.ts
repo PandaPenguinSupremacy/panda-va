@@ -264,6 +264,17 @@ export function getEncouragement(position: number, total: number): string {
   return "🎉 Almost done! Your results are being prepared.";
 }
 
+/** Rotating motivational "Panda Tip" quotes shown on question pages. */
+export function getStageQuote(position: number, total: number): { label: string; quote: string } {
+  const pct = position / total;
+  if (pct <= 0.22) return { label: "Background", quote: "Every successful VA started somewhere." };
+  if (pct <= 0.44) return { label: "Skills", quote: "Transferable skills matter more than experience." };
+  if (pct <= 0.66) return { label: "Challenges", quote: "Consistency beats perfection." };
+  if (pct <= 0.88) return { label: "Job Applications", quote: "Rejections are part of the journey." };
+  return { label: "Almost There", quote: "You're closer to your VA career than you think." };
+}
+
+
 // ============= Recommendation engine =============
 
 export type CareerPath =

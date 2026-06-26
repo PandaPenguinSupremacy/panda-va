@@ -17,7 +17,6 @@ import { loadState, saveState, clearState } from "@/lib/storage";
 import { ProgressBar } from "@/components/assessment/ProgressBar";
 import { QuestionCard } from "@/components/assessment/QuestionCard";
 import { Landing } from "@/components/assessment/Landing";
-import { Milestone } from "@/components/assessment/Milestone";
 import { Processing } from "@/components/assessment/Processing";
 import { ResultsPreview } from "@/components/assessment/ResultsPreview";
 import { ThankYou } from "@/components/assessment/ThankYou";
@@ -30,8 +29,6 @@ import pandaLogo from "@/assets/panda-logo-new.png";
 type Stage =
   | "landing"
   | "questions"
-  | "halfway"
-  | "almost-done"
   | "processing"
   | "results"
   | "thanks";
@@ -70,27 +67,23 @@ const Index = () => {
   };
 
   const handleContinue = () => {
-    const next = getNextQuestionIndex(index, { ...answers });
-    const total = getTotalActiveQuestions(answers);
-    const nextPos = next < questions.length ? getActiveQuestionPosition(next, answers) : total + 1;
+  const next = getNextQuestionIndex(index, { ...answers });
 
-    if (next >= questions.length) {
-      setStage("almost-done");
-      return;
-    }
-    // Halfway milestone (around 50%)
-    if (!hitHalfway && nextPos / total >= 0.5) {
-      setHitHalfway(true);
-      setIndex(next);
-      setStage("halfway");
-      return;
-    }
-    setIndex(next);
-  };
+  if (next >= questions.length) {
+    setStage("processing");
+    return;
+  }
 
-  const handleBack = () => {
+  setIndex(next);
+};
+
+const handleBack = () => {
     if (index === 0) {
       setStage("landing");
+
+      const total = getTotalActiveQuestions(answers);
+      const position = getActiveQuestionPosition(index, answers);
+
       return;
     }
     setIndex(getPrevQuestionIndex(index, answers));
@@ -125,9 +118,6 @@ const Index = () => {
     setHitHalfway(false);
     setStage("landing");
   };
-
-  const total = getTotalActiveQuestions(answers);
-  const position = getActiveQuestionPosition(index, answers);
 
   return (
     <AnimatePresence mode="wait">
@@ -190,31 +180,7 @@ const Index = () => {
         </motion.div>
       )}
 
-      {stage === "halfway" && (
-        <motion.div key="halfway" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <Milestone
-            title="You're halfway there! 🎉"
-            subtitle="We're already identifying patterns in your responses."
-            percent={50}
-            durationMs={1500}
-            onDone={() => setStage("questions")}
-          />
-        </motion.div>
-      )}
-
-      {stage === "almost-done" && (
-        <motion.div key="almost-done" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <Milestone
-            title="🐼 Amazing! We have everything we need."
-            subtitle="Creating your personalized Panda VA Career Report…"
-            percent={100}
-            durationMs={1300}
-            onDone={() => setStage("processing")}
-          />
-        </motion.div>
-      )}
-
-      {stage === "processing" && (
+            {stage === "processing" && (
         <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <Processing onComplete={() => setStage("results")} durationMs={7000} />
         </motion.div>
@@ -230,8 +196,13 @@ const Index = () => {
         </motion.div>
       )}
 
-      {stage === "thanks" && (
-        <motion.div key="thanks" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            {stage === "thanks" && (
+        <motion.div
+          key="thanks"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
           <ThankYou firstName={firstName} onHome={resetAll} />
         </motion.div>
       )}
