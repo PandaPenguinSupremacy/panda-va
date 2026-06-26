@@ -31,20 +31,20 @@ export const EmailForm = ({ onSubmit, loading }: Props) => {
   };
 
   return (
-    <div className="min-h-screen gradient-soft px-6 py-6 flex items-center">
+    <div className="min-h-screen gradient-soft px-6 py-10 flex items-center">
       <div className="max-w-md mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-4"
+          className="text-center mb-8"
         >
-          <div className="mx-auto h-11 w-11 rounded-2xl gradient-primary flex items-center justify-center text-primary-foreground mb-3 shadow-glow">
-            <Mail className="h-5 w-5" />
+          <div className="mx-auto h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center text-primary-foreground mb-4 shadow-glow">
+            <Mail className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-balance">
+          <h1 className="text-3xl sm:text-4xl font-bold text-balance">
             Where should we send your personalized report?
           </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
+          <p className="mt-3 text-muted-foreground">
             We'll send your full VA career path breakdown straight to your inbox.
           </p>
         </motion.div>
@@ -54,29 +54,29 @@ export const EmailForm = ({ onSubmit, loading }: Props) => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="rounded-3xl bg-card border border-border shadow-elegant p-4 space-y-3"
+          className="rounded-3xl bg-card border border-border shadow-elegant p-6 space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium mb-1">First Name</label>
+            <label className="block text-sm font-medium mb-1.5">First Name</label>
             <input
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="Maria"
-              className="w-full rounded-xl border-2 border-border bg-background px-4 py-2.5 outline-none focus:border-primary transition-colors"
+              className="w-full rounded-xl border-2 border-border bg-background px-4 py-3 outline-none focus:border-primary transition-colors"
               maxLength={60}
               disabled={loading}
             />
             {errors.firstName && <p className="mt-1 text-sm text-destructive">{errors.firstName}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Email Address</label>
+            <label className="block text-sm font-medium mb-1.5">Email Address</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@email.com"
-              className="w-full rounded-xl border-2 border-border bg-background px-4 py-2.5 outline-none focus:border-primary transition-colors"
+              className="w-full rounded-xl border-2 border-border bg-background px-4 py-3 outline-none focus:border-primary transition-colors"
               maxLength={255}
               disabled={loading}
             />
@@ -86,7 +86,7 @@ export const EmailForm = ({ onSubmit, loading }: Props) => {
           <button
             type="submit"
             disabled={loading}
-            className="group w-full inline-flex items-center justify-center gap-2 rounded-2xl gradient-primary text-primary-foreground font-semibold text-base px-6 py-3 shadow-glow hover:scale-[1.01] transition-transform disabled:opacity-70 disabled:hover:scale-100"
+            className="group w-full inline-flex items-center justify-center gap-2 rounded-2xl gradient-primary text-primary-foreground font-semibold text-lg px-6 py-4 shadow-glow hover:scale-[1.01] transition-transform disabled:opacity-70 disabled:hover:scale-100"
           >
             {loading ? (
               <>

@@ -18,7 +18,7 @@ const checklist = [
 
 export const ThankYou = ({ firstName, onHome }: Props) => {
   return (
-    <div className="relative min-h-screen px-6 py-10 flex items-center overflow-hidden">
+    <div className="relative min-h-dvh overflow-y-auto px-6 py-10 flex items-center">
       <PandaBg dense />
       <div className="relative max-w-xl mx-auto w-full text-center">
         <motion.div
