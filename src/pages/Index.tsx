@@ -14,14 +14,15 @@ import {
   getRecommendation,
 } from "@/lib/assessment";
 import { loadState, saveState, clearState } from "@/lib/storage";
-import { ProgressBar } from "@/components/assessment/ProgressBar";
 import { QuestionCard } from "@/components/assessment/QuestionCard";
 import { Landing } from "@/components/assessment/Landing";
 import { Processing } from "@/components/assessment/Processing";
 import { ResultsPreview } from "@/components/assessment/ResultsPreview";
 import { ThankYou } from "@/components/assessment/ThankYou";
 import { PandaBg } from "@/components/assessment/PandaBg";
+import { TransitionPage } from "@/components/assessment/TransitionPage";
 import { MotivationalCard } from "@/components/assessment/MotivationalCard";
+import { PandaContextIllustration, getIllustrationCategory } from "@/components/assessment/PandaContextIllustration";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import pandaLogo from "@/assets/panda-logo-new.png";
@@ -29,6 +30,8 @@ import pandaLogo from "@/assets/panda-logo-new.png";
 type Stage =
   | "landing"
   | "questions"
+  | "transition-6"
+  | "transition-12"
   | "processing"
   | "results"
   | "thanks";
@@ -39,7 +42,24 @@ const Index = () => {
   const [answers, setAnswers] = useState<Answers>({});
   const [firstName, setFirstName] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [hitHalfway, setHitHalfway] = useState(false);
+  const [passedQ6, setPassedQ6]   = useState(false);
+  const [passedQ12, setPassedQ12] = useState(false);
+
+  // Viewport lock for all assessment stages
+  useEffect(() => {
+    const lock = stage !== "landing" && stage !== "results" && stage !== "thanks";
+    const els = [
+      document.documentElement,
+      document.body,
+      document.getElementById("root"),
+    ].filter(Boolean) as HTMLElement[];
+    if (lock) {
+      els.forEach((el) => { el.style.height = "100%"; el.style.overflow = "hidden"; });
+    } else {
+      els.forEach((el) => { el.style.height = ""; el.style.overflow = ""; });
+    }
+    return () => { els.forEach((el) => { el.style.height = ""; el.style.overflow = ""; }); };
+  }, [stage]);
 
   useEffect(() => {
     const s = loadState();
@@ -55,157 +75,215 @@ const Index = () => {
 
   const recommendation = useMemo(() => getRecommendation(answers), [answers]);
 
-  const handleStart = () => {
-    setStage("questions");
-    setIndex(0);
-    setHitHalfway(false);
-  };
+  const handleStart = () => { setStage("questions"); setIndex(0); setPassedQ6(false); setPassedQ12(false); };
 
   const handleAnswer = (value: AnswerValue) => {
-    const q = questions[index];
-    setAnswers((a) => ({ ...a, [q.id]: value }));
+    setAnswers((a) => ({ ...a, [questions[index].id]: value }));
   };
 
   const handleContinue = () => {
-  const next = getNextQuestionIndex(index, { ...answers });
+    const currentQ = questions[index];
+    const next = getNextQuestionIndex(index, { ...answers });
 
-  if (next >= questions.length) {
-    setStage("processing");
-    return;
-  }
+    if (!passedQ6 && currentQ.id === "q6") {
+      setPassedQ6(true); setIndex(next); setStage("transition-6"); return;
+    }
+    if (!passedQ12 && currentQ.id === "q12") {
+      setPassedQ12(true); setIndex(next); setStage("transition-12"); return;
+    }
+    if (next >= questions.length) { setStage("processing"); return; }
+    setIndex(next);
+  };
 
-  setIndex(next);
-};
-
-const handleBack = () => {
-  if (index === 0) {
-    setStage("landing");
-    return;
-  }
-
-  setIndex(getPrevQuestionIndex(index, answers));
-};
+  const handleBack = () => {
+    if (index === 0) { setStage("landing"); return; }
+    setIndex(getPrevQuestionIndex(index, answers));
+  };
 
   const handleSubmitEmail = async ({ firstName: fn, email }: { firstName: string; email: string }) => {
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("assessment_submissions").insert({
-        first_name: fn,
-        email,
-        answers_json: answers,
-        recommended_path: recommendation.path,
-      });
+      const submissionData = { first_name: fn, email, answers_json: answers, recommended_path: recommendation.path };
+      const { error } = await supabase.from("assessment_submissions").insert(submissionData);
       if (error) throw error;
-      setFirstName(fn);
-      clearState();
-      setStage("thanks");
+      await fetch("https://hook.us2.make.com/m0yo0uge2nxnjdwrncpl6e14f3i5455c", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submissionData),
+      });
+      setFirstName(fn); clearState(); setStage("thanks");
     } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong. Please try again.");
+      console.error(err); toast.error("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
   const resetAll = () => {
-    clearState();
-    setAnswers({});
-    setIndex(0);
-    setFirstName("");
-    setHitHalfway(false);
-    setStage("landing");
+    clearState(); setAnswers({}); setIndex(0); setFirstName("");
+    setPassedQ6(false); setPassedQ12(false); setStage("landing");
   };
 
-  const total = getTotalActiveQuestions(answers);
-const position = getActiveQuestionPosition(index, answers);
+  const total    = getTotalActiveQuestions(answers);
+  const position = getActiveQuestionPosition(index, answers);
+  const currentQ = questions[index];
+  const illustrationCategory = getIllustrationCategory(currentQ?.id ?? "", currentQ?.title ?? "");
 
   return (
     <AnimatePresence mode="wait">
+
+      {/* ── Landing ─────────────────────────────────────────────────── */}
       {stage === "landing" && (
         <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <Landing onStart={handleStart} />
         </motion.div>
       )}
 
+      {/* ── Questions ────────────────────────────────────────────────
+          Layout:
+          ┌─────────────────────────────────────────────────────┐
+          │  Logo (left)               Q {n} of {total} (right) │ ← 56px header
+          ├─────────────────────────────────────────────────────┤
+          │                                                     │
+          │  [Category illustration — atmospheric, left/bg]    │
+          │                   [Question + options  — right]     │
+          │                                                     │
+          ├─────────────────────────────────────────────────────┤
+          │  Panda Tip card (subtle footer band)                │ ← 56px footer
+          └─────────────────────────────────────────────────────┘
+          Mobile: stacked, illustration behind content, no scroll
+      ────────────────────────────────────────────────────────── */}
       {stage === "questions" && (
         <motion.div
           key="questions"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="relative h-dvh overflow-hidden flex flex-col"
+          className="relative flex flex-col overflow-hidden bg-background"
+          style={{ height: "100dvh" }}
         >
-          <PandaBg mascot mascotPosition="bottom-left" />
+          {/* Pastel blob background */}
+          <PandaBg />
 
-          {/* Header: logo + progress */}
-          <div className="relative z-20 w-full bg-gradient-to-b from-background/90 to-background/0 backdrop-blur">
-            <div className="max-w-2xl mx-auto px-5 pt-4 pb-4">
-              <div className="flex items-center gap-3 mb-3">
-                <button
-                  onClick={handleBack}
-                  aria-label="Back"
-                  className="h-10 w-10 rounded-full glass flex items-center justify-center hover:border-primary/40 transition-colors shrink-0"
-                >
-                  <ArrowLeft className="h-4 w-4 text-primary" />
-                </button>
-                <img src={pandaLogo} alt="Panda VA" className="h-7 object-contain" />
-                <div className="flex-1" />
+          {/* ── Header ── */}
+          <header className="shrink-0 relative z-20 flex items-center justify-between px-5 sm:px-8 h-14"
+            style={{ background: "linear-gradient(to bottom, hsl(var(--background)/0.92) 50%, transparent)" }}>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleBack}
+                aria-label="Go back"
+                className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/8 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <img src={pandaLogo} alt="Panda VA" className="h-7 object-contain opacity-80" />
+            </div>
+            {/* Progress text only — no bar */}
+            <p className="text-xs font-medium text-muted-foreground tabular-nums">
+              Question <span className="text-foreground font-semibold">{position}</span> of {total}
+            </p>
+          </header>
+
+          {/* ── Main content area ── */}
+          <div className="relative flex-1 min-h-0 flex">
+
+            {/* Atmospheric illustration — left side on desktop, full-bg on mobile */}
+            {/* Desktop: absolute left column, blended */}
+            <div
+              className="hidden lg:block absolute inset-y-0 left-0 w-[45%] pointer-events-none"
+              aria-hidden
+            >
+              <PandaContextIllustration
+                category={illustrationCategory}
+                opacity={0.13}
+                atmospheric
+                className="absolute bottom-0 left-0 w-full"
+                style={{ height: "100%", maxHeight: "100%" } as React.CSSProperties}
+              />
+            </div>
+
+            {/* Mobile: atmospheric behind content */}
+            <div
+              className="lg:hidden absolute inset-0 pointer-events-none"
+              aria-hidden
+              style={{
+                maskImage: "radial-gradient(ellipse 70% 80% at 20% 80%, rgba(0,0,0,1) 20%, rgba(0,0,0,0.4) 55%, rgba(0,0,0,0) 80%)",
+                WebkitMaskImage: "radial-gradient(ellipse 70% 80% at 20% 80%, rgba(0,0,0,1) 20%, rgba(0,0,0,0.4) 55%, rgba(0,0,0,0) 80%)",
+              }}
+            >
+              <PandaContextIllustration
+                category={illustrationCategory}
+                opacity={0.08}
+                atmospheric={false}
+                className="absolute bottom-0 left-0 w-[55%]"
+              />
+            </div>
+
+            {/* Question content — right on desktop, centered on mobile */}
+            <div className="relative z-10 w-full flex items-center justify-end lg:justify-end">
+              <div className="w-full lg:w-[58%] xl:w-[55%] px-5 sm:px-8 lg:pr-10 xl:pr-16 overflow-y-auto max-h-full py-4">
+                <AnimatePresence mode="wait">
+                  <QuestionCard
+                    key={currentQ.id}
+                    question={currentQ}
+                    value={answers[currentQ.id]}
+                    encouragement={getEncouragement(position, total)}
+                    onAnswer={handleAnswer}
+                    onContinue={handleContinue}
+                  />
+                </AnimatePresence>
               </div>
-              <ProgressBar current={position} total={total} />
             </div>
           </div>
 
-          {/* Question area — scrolls internally only if a single question's content exceeds viewport */}
-          <div className="relative flex-1 min-h-0 overflow-y-auto">
-            <div className="max-w-2xl mx-auto px-5 pt-6 pb-6">
-              <AnimatePresence mode="wait">
-                <QuestionCard
-                  key={questions[index].id}
-                  question={questions[index]}
-                  value={answers[questions[index].id]}
-                  encouragement={getEncouragement(position, total)}
-                  onAnswer={handleAnswer}
-                  onContinue={handleContinue}
-                />
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Motivational "Panda Tip" — blended footer band */}
-          <div className="relative z-10 px-5 pb-5 pt-2 bg-gradient-to-t from-background/85 to-transparent">
-            <div className="max-w-2xl mx-auto">
+          {/* ── Footer: Panda Tip ── */}
+          <footer
+            className="shrink-0 relative z-20 px-5 sm:px-8 pb-4 pt-2"
+            style={{ background: "linear-gradient(to top, hsl(var(--background)/0.88) 50%, transparent)" }}
+          >
+            <div className="max-w-lg lg:ml-auto lg:mr-10 xl:mr-16">
               <MotivationalCard {...getStageQuote(position, total)} />
             </div>
-          </div>
+          </footer>
         </motion.div>
       )}
 
-            {stage === "processing" && (
-        <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      {/* ── Transition pages ─────────────────────────────────────── */}
+      {stage === "transition-6" && (
+        <motion.div key="t6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          style={{ height: "100dvh", overflow: "hidden" }}>
+          <TransitionPage variant="halfway" onContinue={() => setStage("questions")} />
+        </motion.div>
+      )}
+      {stage === "transition-12" && (
+        <motion.div key="t12" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          style={{ height: "100dvh", overflow: "hidden" }}>
+          <TransitionPage variant="almost" onContinue={() => setStage("questions")} />
+        </motion.div>
+      )}
+
+      {/* ── Processing ───────────────────────────────────────────── */}
+      {stage === "processing" && (
+        <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          style={{ height: "100dvh", overflow: "hidden" }}>
           <Processing onComplete={() => setStage("results")} durationMs={7000} />
         </motion.div>
       )}
 
+      {/* ── Results (scrollable) ─────────────────────────────────── */}
       {stage === "results" && (
         <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <ResultsPreview
-            recommendation={recommendation}
-            onSubmit={handleSubmitEmail}
-            loading={submitting}
-          />
+          <ResultsPreview recommendation={recommendation} onSubmit={handleSubmitEmail} loading={submitting} />
         </motion.div>
       )}
 
-            {stage === "thanks" && (
-        <motion.div
-          key="thanks"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
+      {/* ── Thanks (scrollable) ──────────────────────────────────── */}
+      {stage === "thanks" && (
+        <motion.div key="thanks" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <ThankYou firstName={firstName} onHome={resetAll} />
         </motion.div>
       )}
+
     </AnimatePresence>
   );
 };
