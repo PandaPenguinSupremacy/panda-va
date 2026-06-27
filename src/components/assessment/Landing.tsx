@@ -144,22 +144,12 @@ export const Landing = ({ onStart }: Props) => {
               </ul>
             </div>
 
-            <figure className="glass rounded-3xl p-5 bg-primary-mist/60">
-              <blockquote className="text-sm italic text-foreground leading-relaxed">
-                <span className="text-primary text-3xl leading-none mr-1 align-top">“</span>
-                This assessment helped me finally understand which path is right for me — and exactly
-                what to do next.
-              </blockquote>
-              <figcaption className="mt-3 flex items-center gap-2 text-xs">
-                <span className="h-7 w-7 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold">
-                  M
-                </span>
-                <span>
-                  <span className="font-bold text-foreground">Maria S.</span>
-                  <span className="text-muted-foreground"> · Future VA</span>
-                </span>
-              </figcaption>
-            </figure>
+            <div className="glass rounded-3xl p-5">
+  <p className="text-3xl font-bold text-primary">2 Minutes</p>
+  <p className="text-sm text-muted-foreground">
+    Complete the assessment and discover your ideal VA path.
+  </p>
+</div>
           </motion.aside>
         </div>
       </main>
