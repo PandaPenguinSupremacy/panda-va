@@ -8,10 +8,14 @@ import pandaProblem from "@/assets/panda-problem-solving.png";
 import pandaCelebrate from "@/assets/panda-celebrating.png";
 
 interface Props {
-  questionId: string;
+  questionId?: string;
+  className?: string;
+  priority?: boolean;
 }
 
-const getPandaImage = (questionId: string) => {
+const getPandaImage = (questionId?: string) => {
+  if (!questionId) return pandaGoals;
+
   switch (questionId) {
     case "q1":
     case "q2":
