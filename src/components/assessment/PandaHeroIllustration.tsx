@@ -44,15 +44,20 @@ const getPandaImage = (questionId?: string) => {
 
 export const PandaHeroIllustration = ({
   questionId,
+  className = "",
+  priority = false,
 }: Props) => {
+  const image = getPandaImage(questionId);
+
   return (
     <motion.div
       key={questionId}
       initial={{ opacity: 0, scale: 0.92, y: 12 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="relative"
+      className={`relative ${className}`}
     >
+      {/* Ambient glow */}
       <div
         className="absolute inset-0 -z-10 blur-3xl opacity-70"
         style={{
@@ -62,9 +67,30 @@ export const PandaHeroIllustration = ({
       />
 
       <motion.img
-        src={getPandaImage(questionId)}
-        alt="Panda VA illustration"
-        className="w-full h-auto select-none"
+        src={image}
+        alt="Panda VA mascot"
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        className="
+          relative
+          w-full
+          h-auto
+          select-none
+                 [mask-image:radial-gradient(circle,black_70%,transparent_100%)]
+          [-webkit-mask-image:radial-gradient(circle,black_70%,transparent_100%)]
+          drop-shadow-[0_40px_80px_rgba(124,58,237,0.25)]
+        "
+      />
+
+      {/* Soft background glow */}
+      <div
+        className="
+          absolute inset-0
+          rounded-full
+          blur-[120px]
+          bg-primary/10
+          -z-10
+        "
       />
     </motion.div>
   );

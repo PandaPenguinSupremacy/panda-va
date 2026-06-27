@@ -22,10 +22,10 @@ import { ThankYou } from "@/components/assessment/ThankYou";
 import { PandaBg } from "@/components/assessment/PandaBg";
 import { TransitionPage } from "@/components/assessment/TransitionPage";
 import { MotivationalCard } from "@/components/assessment/MotivationalCard";
-import { PandaContextIllustration, getIllustrationCategory } from "@/components/assessment/PandaContextIllustration";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import pandaLogo from "@/assets/panda-logo-new.png";
+import { PandaHeroIllustration } from "@/components/assessment/PandaHeroIllustration";
 
 type Stage =
   | "landing"
@@ -127,8 +127,7 @@ const Index = () => {
   const total    = getTotalActiveQuestions(answers);
   const position = getActiveQuestionPosition(index, answers);
   const currentQ = questions[index];
-  const illustrationCategory = getIllustrationCategory(currentQ?.id ?? "", currentQ?.title ?? "");
-
+  
   return (
     <AnimatePresence mode="wait">
 
@@ -190,34 +189,43 @@ const Index = () => {
             {/* Atmospheric illustration — left side on desktop, full-bg on mobile */}
             {/* Desktop: absolute left column, blended */}
             <div
-              className="hidden lg:block absolute inset-y-0 left-0 w-[45%] pointer-events-none"
-              aria-hidden
-            >
-              <PandaContextIllustration
-                category={illustrationCategory}
-                opacity={0.13}
-                atmospheric
-                className="absolute bottom-0 left-0 w-full"
-                style={{ height: "100%", maxHeight: "100%" } as React.CSSProperties}
-              />
-            </div>
+  className="hidden lg:flex absolute inset-y-0 left-0 w-[50%] items-end justify-center pointer-events-none"
+  aria-hidden
+>
+  <div
+    className="
+      absolute inset-0
+      bg-gradient-to-r
+      from-primary/10
+      via-transparent
+      to-transparent
+      blur-3xl
+    "
+  />
+
+  <PandaHeroIllustration
+    questionId={currentQ.id}
+    className="w-[90%] max-w-[700px]"
+  />
+</div>
 
             {/* Mobile: atmospheric behind content */}
             <div
-              className="lg:hidden absolute inset-0 pointer-events-none"
-              aria-hidden
-              style={{
-                maskImage: "radial-gradient(ellipse 70% 80% at 20% 80%, rgba(0,0,0,1) 20%, rgba(0,0,0,0.4) 55%, rgba(0,0,0,0) 80%)",
-                WebkitMaskImage: "radial-gradient(ellipse 70% 80% at 20% 80%, rgba(0,0,0,1) 20%, rgba(0,0,0,0.4) 55%, rgba(0,0,0,0) 80%)",
-              }}
-            >
-              <PandaContextIllustration
-                category={illustrationCategory}
-                opacity={0.08}
-                atmospheric={false}
-                className="absolute bottom-0 left-0 w-[55%]"
-              />
-            </div>
+  className="
+    lg:hidden
+    absolute
+    bottom-0
+    left-0
+    w-full
+    pointer-events-none
+    opacity-20
+  "
+>
+  <PandaHeroIllustration
+    questionId={currentQ.id}
+    className="w-[80%] mx-auto"
+  />
+</div>
 
             {/* Question content — right on desktop, centered on mobile */}
             <div className="relative z-10 w-full flex items-center justify-end lg:justify-end">
@@ -236,15 +244,7 @@ const Index = () => {
             </div>
           </div>
 
-          {/* ── Footer: Panda Tip ── */}
-          <footer
-            className="shrink-0 relative z-20 px-5 sm:px-8 pb-4 pt-2"
-            style={{ background: "linear-gradient(to top, hsl(var(--background)/0.88) 50%, transparent)" }}
-          >
-            <div className="max-w-lg lg:ml-auto lg:mr-10 xl:mr-16">
-              <MotivationalCard {...getStageQuote(position, total)} />
-            </div>
-          </footer>
+          
         </motion.div>
       )}
 
