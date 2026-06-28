@@ -67,20 +67,21 @@ export const PandaHeroIllustration = ({
       />
 
       <motion.img
-        src={image}
-        alt="Panda VA mascot"
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        className="
-          relative
-          w-full
-          h-auto
-          select-none
-                 [mask-image:radial-gradient(circle,black_70%,transparent_100%)]
-          [-webkit-mask-image:radial-gradient(circle,black_70%,transparent_100%)]
-          drop-shadow-[0_40px_80px_rgba(124,58,237,0.25)]
-        "
-      />
+  src={image}
+  alt="Panda VA mascot"
+  loading={priority ? "eager" : "lazy"}
+  decoding="async"
+  className="
+    w-full
+    h-auto
+    object-cover
+    select-none
+    drop-shadow-[0_40px_80px_rgba(124,58,237,0.15)]
+
+    [mask-image:radial-gradient(circle at center,black 55%,transparent 95%)]
+[-webkit-mask-image:radial-gradient(circle at center,black 55%,transparent 95%)]
+  "
+/>
 
       {/* Soft background glow */}
       <div

@@ -165,7 +165,7 @@ const Index = () => {
           <PandaBg />
 
           {/* ── Header ── */}
-          <header className="shrink-0 relative z-20 flex items-center justify-between px-5 sm:px-8 h-14"
+          <header className="shrink-0 relative z-20 flex items-center justify-between px-3 sm:px-4 lg:px-6 h-14"
             style={{ background: "linear-gradient(to bottom, hsl(var(--background)/0.92) 50%, transparent)" }}>
             <div className="flex items-center gap-3">
               <button
@@ -189,8 +189,15 @@ const Index = () => {
             {/* Atmospheric illustration — left side on desktop, full-bg on mobile */}
             {/* Desktop: absolute left column, blended */}
             <div
-  className="hidden lg:flex absolute inset-y-0 left-0 w-[50%] items-end justify-center pointer-events-none"
-  aria-hidden
+  className="
+    hidden lg:flex
+    absolute inset-y-0 left-0
+    w-[58%]
+    items-center
+    justify-center
+    pointer-events-none
+    -ml-16
+  "
 >
   <div
     className="
@@ -204,9 +211,13 @@ const Index = () => {
   />
 
   <PandaHeroIllustration
-    questionId={currentQ.id}
-    className="w-[90%] max-w-[700px]"
-  />
+  questionId={currentQ.id}
+  className="
+    w-[120%]
+    max-w-[900px]
+    opacity-95
+  "
+/>
 </div>
 
             {/* Mobile: atmospheric behind content */}
@@ -229,7 +240,17 @@ const Index = () => {
 
             {/* Question content — right on desktop, centered on mobile */}
             <div className="relative z-10 w-full flex items-center justify-end lg:justify-end">
-              <div className="w-full lg:w-[58%] xl:w-[55%] px-5 sm:px-8 lg:pr-10 xl:pr-16 overflow-y-auto max-h-full py-4">
+              <div className="
+  w-full
+  lg:w-[50%]
+  xl:w-[48%]
+  px-4
+  sm:px-6
+  lg:pr-6
+  overflow-y-auto
+  max-h-full
+  py-4
+">
                 <AnimatePresence mode="wait">
                   <QuestionCard
                     key={currentQ.id}

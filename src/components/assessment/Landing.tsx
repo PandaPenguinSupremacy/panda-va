@@ -23,16 +23,16 @@ const trustItems = [
 
 export const Landing = ({ onStart }: Props) => {
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative h-screen overflow-hidden">
       <PandaBg dense />
 
       {/* Header (logo only, kept light) */}
-      <header className="relative px-5 sm:px-10 pt-6 sm:pt-8">
+      <header className="relative h-[72px] px-8 flex items-center shrink-0">
         <div className="mx-auto max-w-7xl flex items-center justify-between">
           <img
   src={pandaLogo}
   alt="Panda VA"
-  className="h-16 sm:h-20 lg:h-24 object-contain"
+  className="h-12 object-contain"
 />
           <p className="hidden sm:block text-[11px] uppercase tracking-[0.28em] font-semibold text-primary/80">
             Prepare · Present · Get Hired
@@ -40,20 +40,51 @@ export const Landing = ({ onStart }: Props) => {
         </div>
       </header>
 
-      <main className="relative px-5 sm:px-10 pt-6 sm:pt-10 pb-16">
-        <div className="mx-auto max-w-7xl grid gap-10 lg:gap-12 lg:grid-cols-12 items-center">
-          {/* LEFT — Hero illustration */}
-          <div className="lg:col-span-5 order-2 lg:order-1 relative flex justify-center lg:justify-start">
-  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent blur-3xl" />
+      <main className="relative h-[calc(100vh-90px)] px-4 overflow-hidden">
+  <div className="w-full h-full grid lg:grid-cols-[0.95fr_1fr_0.75fr] items-center">
+          {/* LEFT — Panda Illustration */}
+<div
+  className="
+    hidden lg:flex
+    order-1
+    relative
+    h-full
+    items-end
+    justify-center
+    overflow-hidden
+  "
+>
+  {/* Soft fade into background */}
+  <div
+    className="
+      absolute
+      inset-0
+      bg-gradient-to-r
+      from-primary/10
+      via-primary/5
+      to-transparent
+      rounded-r-[100px]
+    "
+  />
 
   <PandaHeroIllustration
-    className="w-[100%] sm:w-[85%] lg:w-[130%] max-w-[700px] -ml-10"
+    className="
+      w-[88%]
+      max-w-[500px]
+      max-h-[78vh]
+      object-contain
+      -mb-6
+    "
     priority
   />
 </div>
 
           {/* CENTER — Main content */}
-          <div className="lg:col-span-4 order-1 lg:order-2 text-center lg:text-left">
+          <div className="
+  order-1 lg:order-2
+  text-center lg:text-left
+  px-6 lg:px-4
+">
             <motion.p
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -68,11 +99,11 @@ export const Landing = ({ onStart }: Props) => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.05] text-balance text-foreground"
+              className="mt-5 text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.05] text-balance text-foreground"
             >
               Discover Your Best
               <br />
-              <span className="font-script text-5xl sm:text-6xl lg:text-7xl text-gradient inline-block mt-1">
+              <span className="font-script text-4xl sm:text-5xl lg:text-6xl text-gradient inline-block mt-1">
                 VA Career Path
               </span>
               <Heart className="inline-block h-5 w-5 ml-1 text-primary-glow fill-primary-glow/40 -mt-6" />
@@ -82,7 +113,7 @@ export const Landing = ({ onStart }: Props) => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-5 text-base sm:text-lg text-muted-foreground text-balance max-w-xl mx-auto lg:mx-0"
+              className="mt-5 text-base sm:text-lg text-muted-foreground text-balance max-w-lg mx-auto lg:mx-0"
             >
               A free 2-minute assessment that matches your experience, strengths, and goals to
               the Virtual Assistant career path where you're most likely to thrive.
@@ -113,12 +144,12 @@ export const Landing = ({ onStart }: Props) => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.45 }}
-              className="mt-8 grid sm:grid-cols-2 gap-3 text-left"
+              className="mt-5 grid sm:grid-cols-2 gap-2 text-left"
             >
               {benefits.map((b) => (
                 <li
                   key={b.text}
-                  className="glass rounded-2xl p-3.5 flex items-center gap-3"
+                  className="glass rounded-2xl p-2.5 flex items-center gap-3"
                 >
                   <span className="h-10 w-10 rounded-xl bg-primary-soft text-primary flex items-center justify-center shrink-0 shadow-sm">
                     <b.icon className="h-5 w-5" />
@@ -134,7 +165,12 @@ export const Landing = ({ onStart }: Props) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="lg:col-span-3 order-3 space-y-4 self-center"
+            className="
+  order-3
+  space-y-4
+  self-center
+  px-4
+"
           >
             <div className="glass-strong rounded-3xl p-5">
               <p className="text-sm font-bold text-foreground">Trusted by aspiring VAs</p>
@@ -176,7 +212,7 @@ export const Landing = ({ onStart }: Props) => {
         </div>
       </main>
 
-      <footer className="relative px-6 pb-6 text-center text-xs text-muted-foreground">
+      <footer className="relative px-4 pb-4 text-center text-xs text-muted-foreground">
         © {new Date().getFullYear()} Panda VA · Prepare · Present · Get Hired
       </footer>
     </div>
